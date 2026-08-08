@@ -227,7 +227,8 @@ export default function Prediction({ user }) {
 
     // Try ML service directly (Flask on port 5000)
     try {
-      const mlRes = await fetch('http://localhost:5000/predict', {
+      const ML_URL = process.env.REACT_APP_ML_SERVICE_URL || 'http://localhost:5000';
+      const mlRes = await fetch(`${ML_URL}/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
