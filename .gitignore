@@ -1,0 +1,21 @@
+# Secrets — never commit real credentials
+backend/config/database.local.php
+backend/config/keys.local.php
+
+# Node
+node_modules/
+frontend/build/
+frontend/.env
+frontend/.env.local
+
+# Python
+ml_service/venv/
+ml_service/__pycache__/
+ml_service/*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Archives (don't commit zip backups)
+*.zip
