@@ -14,23 +14,24 @@ import SalesCalendar from './pages/SalesCalendar';
 import ProductRankings from './pages/ProductRankings';
 import PriceHistory from './pages/PriceHistory';
 import LoginPage from './pages/LoginPage';
+import { setWriteToken } from './api/service';
 import './App.css';
 
 export const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost/Business-Intelligence/backend/api';
 
 const NAV = [
   { section: 'Overview' },
-  { id: 'dashboard',    label: 'Dashboard',          icon: '▦',  roles: ['owner','manager'] },
+  { id: 'dashboard',    label: 'Dashboard',          icon: '▦',  roles: ['owner','manager','guest'] },
   { id: 'calendar',     label: 'Sales Calendar',     icon: '📅', roles: ['owner','manager'] },
   { section: 'Operations' },
-  { id: 'products',     label: 'Products & Stock',   icon: '⊞',  roles: ['owner','manager'] },
+  { id: 'products',     label: 'Products & Stock',   icon: '⊞',  roles: ['owner','manager','guest'] },
   { id: 'profitloss',   label: 'Profit & Loss',      icon: '₹',  roles: ['owner'] },
   { id: 'expiry',       label: 'Expiry Tracker',     icon: '⏰', roles: ['owner','manager'] },
   { section: 'Analytics' },
-  { id: 'rankings',     label: 'Product Rankings',   icon: '🏆', roles: ['owner','manager'] },
-  { id: 'pricehistory', label: 'Price History',      icon: '📉', roles: ['owner','manager'] },
+  { id: 'rankings',     label: 'Product Rankings',   icon: '🏆', roles: ['owner','manager','guest'] },
+  { id: 'pricehistory', label: 'Price History',      icon: '📉', roles: ['owner','manager','guest'] },
   { section: 'Intelligence' },
-  { id: 'prediction',   label: 'AI Demand Forecast', icon: '◈',  badge: 'AI', roles: ['owner','manager'] },
+  { id: 'prediction',   label: 'AI Demand Forecast', icon: '◈',  badge: 'AI', roles: ['owner','manager','guest'] },
   { id: 'risk',         label: 'Risk Alerts',        icon: '◉',  badge: '3', roles: ['owner','manager'] },
   { id: 'customers',    label: 'Customer Intel',     icon: '◎',  roles: ['owner','manager'] },
   { id: 'simulation',   label: 'What-If Simulator',  icon: '⬡',  roles: ['owner'] },
@@ -44,6 +45,7 @@ const NAV = [
 const ROLE_META = {
   owner:   { color: '#2d7a3a', bg: '#e8f5e9', icon: '👑' },
   manager: { color: '#1d4ed8', bg: '#dbeafe', icon: '🏪' },
+  guest:   { color: '#6b7280', bg: '#f1f5f9', icon: '👀' },
 };
 
 const pages = {
@@ -91,6 +93,7 @@ export default function App() {
   }, []);
 
   const handleLogin = (role) => {
+    setWriteToken(role.token || null);
     setUser(role);
     const firstPage = NAV.find(n => n.id && n.roles?.includes(role.id));
     setActive(firstPage?.id || 'dashboard');
@@ -145,10 +148,10 @@ export default function App() {
                 <div className="store-dot" />
                 <div><div className="store-name">Business Intelligence</div><div className="store-text">System Online</div></div>
               </div>
-              <button className="btn-logout" onClick={() => { setUser(null); setActive(null); }}>⏻ Logout</button>
+              <button className="btn-logout" onClick={() => { setWriteToken(null); setUser(null); setActive(null); }}>⏻ Logout</button>
             </div>
           ) : (
-            <button className="btn-logout-icon" onClick={() => { setUser(null); setActive(null); }} title="Logout">⏻</button>
+            <button className="btn-logout-icon" onClick={() => { setWriteToken(null); setUser(null); setActive(null); }} title="Logout">⏻</button>
           )}
         </div>
       </aside>

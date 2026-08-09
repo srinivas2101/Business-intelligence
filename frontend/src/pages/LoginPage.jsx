@@ -1,26 +1,6 @@
 import React, { useState } from 'react';
 
-// ─── Fixed credentials for 2 roles ───────────────────────────────────────────
-const CREDENTIALS = [
-  {
-    id: 'owner',
-    label: 'Store Owner',
-    icon: '👑',
-    email: 'owner@supermart.in',
-    password: 'Owner@Sri2026',
-    color: '#16a34a',
-    bg: '#f0fdf4',
-  },
-  {
-    id: 'manager',
-    label: 'Store Manager',
-    icon: '🏪',
-    email: 'manager@supermart.in',
-    password: 'Manager@Sri2026',
-    color: '#2563eb',
-    bg: '#eff6ff',
-  },
-];
+const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost/Business-Intelligence/backend/api';
 
 export default function LoginPage({ onLogin }) {
   const [email, setEmail]       = useState('');
@@ -29,22 +9,32 @@ export default function LoginPage({ onLogin }) {
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e?.preventDefault();
     setError('');
-
-    const emailTrimmed = email.trim().toLowerCase();
-    const role = CREDENTIALS.find(
-      r => r.email === emailTrimmed && r.password === password
-    );
-
-    if (!role) {
-      setError('Invalid email or password. Please try again.');
-      return;
-    }
-
     setLoading(true);
-    setTimeout(() => onLogin(role), 800);
+    try {
+      const res = await fetch(`${API_BASE}/login.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.error || 'Invalid email or password. Please try again.');
+        setLoading(false);
+        return;
+      }
+      onLogin({ id: data.role, label: data.label, icon: data.icon, token: data.token });
+    } catch (err) {
+      setError('Cannot reach server. Please try again.');
+      setLoading(false);
+    }
+  };
+
+  const handleGuest = () => {
+    setError('');
+    onLogin({ id: 'guest', label: 'Guest (read-only)', icon: '👀', token: null });
   };
 
   return (
@@ -225,6 +215,15 @@ export default function LoginPage({ onLogin }) {
               )}
             </button>
           </form>
+
+          {/* Guest access */}
+          <button
+            type="button"
+            onClick={handleGuest}
+            style={S.guestBtn}
+          >
+            👀 Continue as Guest (view only)
+          </button>
 
           {/* Footer */}
           <div style={S.cardFooter}>
@@ -510,6 +509,20 @@ const S = {
     fontStyle: 'italic',
     textAlign: 'center',
     background: '#f8fafc',
+  },
+
+  guestBtn: {
+    width: '100%',
+    marginTop: 14,
+    padding: '11px',
+    background: '#f8fafc',
+    color: '#374151',
+    border: '1.5px solid #e2e8f0',
+    borderRadius: 11,
+    fontSize: 13.5,
+    fontWeight: 600,
+    cursor: 'pointer',
+    fontFamily: "'DM Sans', sans-serif",
   },
 
   cardFooter: {

@@ -6,6 +6,7 @@ header("Content-Type: application/json");
 if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") { http_response_code(200); exit(0); }
 
 require_once '../config/database.php';
+requireWriteAccess();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') { sendJSON(['error' => 'POST only'], 405); }
 

@@ -1,13 +1,22 @@
 export const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost/Business-Intelligence/backend/api';
 
+let WRITE_TOKEN = null;
+export const setWriteToken = (token) => { WRITE_TOKEN = token; };
+export const getWriteToken = () => WRITE_TOKEN;
+
 const apiFetch = async (endpoint, options = {}) => {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 8000);
   try {
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    const method = (options.method || 'GET').toUpperCase();
+    if (WRITE_TOKEN && method !== 'GET') {
+      headers['Authorization'] = `Bearer ${WRITE_TOKEN}`;
+    }
     const res = await fetch(`${API_BASE}/${endpoint}`, {
-      headers: { 'Content-Type': 'application/json' },
       signal: controller.signal,
       ...options,
+      headers,
     });
     clearTimeout(timer);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

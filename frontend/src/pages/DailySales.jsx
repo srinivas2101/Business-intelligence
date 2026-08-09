@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ALL_PRODUCTS } from '../data/products';
-import { productsAPI } from '../api/service';
+import { productsAPI, getWriteToken } from '../api/service';
 
 const parseProduct = p => ({
   ...p,
@@ -47,7 +47,12 @@ export default function DailySales({ user }) {
     form.append('bills_file', file);
     form.append('sale_date', saleDate);
     try {
-      const res  = await fetch(API, { method:'POST', body:form });
+      const token = getWriteToken();
+      const res  = await fetch(API, {
+        method:'POST',
+        body:form,
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      });
       const data = await res.json();
       if (data.success) {
         setResult(data); setStatus('success'); setFile(null);

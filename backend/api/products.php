@@ -10,6 +10,11 @@ require_once '../config/database.php';
 $db     = Database::getInstance();
 $method = $_SERVER['REQUEST_METHOD'];
 
+if (in_array($method, ['POST', 'PUT', 'DELETE'])) {
+    requireWriteAccess();
+}
+
+
 // Auto-create price_history table if it doesn't exist
 $db->execute("CREATE TABLE IF NOT EXISTS price_history (
     id          INT AUTO_INCREMENT PRIMARY KEY,

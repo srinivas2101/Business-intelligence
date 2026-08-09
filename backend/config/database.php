@@ -60,6 +60,30 @@ function sendJSON($data, $code = 200) {
     exit;
 }
 
+// Call this at the top of any write-capable endpoint (POST/PUT/DELETE handlers)
+// to block requests that don't carry a valid owner/manager token — e.g. the
+// guest/read-only role never receives this token, so it can view data but
+// never modify it, even by calling the API directly.
+function requireWriteAccess() {
+    $keysFile = __DIR__ . '/keys.local.php';
+    if (file_exists($keysFile)) require_once $keysFile;
+
+    $authHeader = '';
+    if (function_exists('getallheaders')) {
+        $headers = getallheaders();
+        $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+    }
+    if (!$authHeader && isset($_SERVER['HTTP_AUTHORIZATION'])) {
+        $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+    }
+    $token = trim(str_replace('Bearer', '', $authHeader));
+
+    if (!defined('WRITE_TOKEN') || $token === '' || $token !== WRITE_TOKEN) {
+        sendJSON(['error' => 'Read-only access — sign in as Owner or Manager to make changes'], 403);
+    }
+}
+
+
 function getMLPrediction($endpoint, $data) {
     if (!function_exists('curl_init')) return null;
     $ch = curl_init(ML_SERVICE_URL . $endpoint);

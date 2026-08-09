@@ -4,3 +4,4 @@
  * API key. keys.local.php is in .gitignore — it will NEVER be committed.
  */
 $SERPAPI_KEY = "your_real_serpapi_key_here";
+define('WRITE_TOKEN', 'generate_a_long_random_string_here');
