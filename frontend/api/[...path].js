@@ -16,9 +16,13 @@ export default async function handler(req, res) {
     }
     const body = chunks.length ? Buffer.concat(chunks) : undefined;
 
-    // Forward headers, but drop ones that don't make sense cross-host
-    const skipHeaders = ['host', 'connection', 'content-length'];
-    const headers = {};
+    // Forward headers, but drop ones that don't make sense cross-host.
+    // Force a real browser User-Agent — InfinityFree's anti-bot layer blocks
+    // Node's default server-side fetch UA with a JS challenge page.
+    const skipHeaders = ['host', 'connection', 'content-length', 'user-agent'];
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    };
     for (const [key, value] of Object.entries(req.headers)) {
       if (skipHeaders.includes(key.toLowerCase())) continue;
       headers[key] = value;
