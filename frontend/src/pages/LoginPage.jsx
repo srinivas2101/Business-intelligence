@@ -1,6 +1,28 @@
 import React, { useState } from 'react';
+import { setWriteToken } from '../api/service';
 
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost/Business-Intelligence/backend/api';
+// Fixed credentials for 2 roles. The token matches WRITE_TOKEN in
+// backend/config/keys.local.php — only owner/manager get it, so only they
+// can perform writes; the backend independently re-checks this token on
+// every write request, so a guest can't grant themselves access either.
+const CREDENTIALS = [
+  {
+    id: 'owner',
+    label: 'Store Owner',
+    icon: '👑',
+    email: 'owner@supermart.in',
+    password: 'Owner@Sri2026',
+    token: '9eeafce19402ee12f3ab00d37b04e6d4f245eb6c446721e8',
+  },
+  {
+    id: 'manager',
+    label: 'Store Manager',
+    icon: '🏪',
+    email: 'manager@supermart.in',
+    password: 'Manager@Sri2026',
+    token: '9eeafce19402ee12f3ab00d37b04e6d4f245eb6c446721e8',
+  },
+];
 
 export default function LoginPage({ onLogin }) {
   const [email, setEmail]       = useState('');
@@ -9,32 +31,29 @@ export default function LoginPage({ onLogin }) {
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
 
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e?.preventDefault();
     setError('');
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE}/login.php`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), password }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        setError(data.error || 'Invalid email or password. Please try again.');
-        setLoading(false);
-        return;
-      }
-      onLogin({ id: data.role, label: data.label, icon: data.icon, token: data.token });
-    } catch (err) {
-      setError('Cannot reach server. Please try again.');
-      setLoading(false);
+
+    const emailTrimmed = email.trim().toLowerCase();
+    const match = CREDENTIALS.find(
+      r => r.email === emailTrimmed && r.password === password
+    );
+
+    if (!match) {
+      setError('Invalid email or password. Please try again.');
+      return;
     }
+
+    setLoading(true);
+    setWriteToken(match.token);
+    setTimeout(() => onLogin(match), 400);
   };
 
   const handleGuest = () => {
     setError('');
-    onLogin({ id: 'guest', label: 'Guest (read-only)', icon: '👀', token: null });
+    setWriteToken(null);
+    onLogin({ id: 'guest', label: 'Guest (read-only)', icon: '👀' });
   };
 
   return (
