@@ -1,8 +1,8 @@
-// Vercel Serverless Function — proxies /api/* to the InfinityFree PHP backend.
+// Vercel Serverless Function — proxies /api/* to the PHP backend.
 // Unlike vercel.json "rewrites" (which only reliably forward GET), this
 // function forwards ANY method (GET, POST, file uploads) with the raw body.
 
-const BACKEND = 'https://srinivasan.free.nf/backend/api';
+const BACKEND = process.env.BACKEND_URL || 'https://srinivasan.free.nf/backend/api';
 
 export default async function handler(req, res) {
   try {

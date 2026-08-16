@@ -5,13 +5,18 @@
 $localConfig = __DIR__ . '/database.local.php';
 if (file_exists($localConfig)) {
     require_once $localConfig;
+} elseif (getenv('DB_HOST')) {
+    define('DB_HOST', getenv('DB_HOST'));
+    define('DB_USER', getenv('DB_USER'));
+    define('DB_PASS', getenv('DB_PASS'));
+    define('DB_NAME', getenv('DB_NAME'));
 } else {
     define('DB_HOST', '127.0.0.1');
     define('DB_USER', 'root');
     define('DB_PASS', '');
     define('DB_NAME', 'CHANGE_ME');
 }
-define('ML_SERVICE_URL', 'http://localhost:5000');
+define('ML_SERVICE_URL', getenv('ML_SERVICE_URL') ?: 'http://localhost:5000');
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -67,6 +72,9 @@ function sendJSON($data, $code = 200) {
 function requireWriteAccess() {
     $keysFile = __DIR__ . '/keys.local.php';
     if (file_exists($keysFile)) require_once $keysFile;
+    if (!defined('WRITE_TOKEN') && getenv('WRITE_TOKEN')) {
+        define('WRITE_TOKEN', getenv('WRITE_TOKEN'));
+    }
 
     $authHeader = '';
     if (function_exists('getallheaders')) {
